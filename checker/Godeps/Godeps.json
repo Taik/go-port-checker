@@ -1,0 +1,21 @@
+{
+	"ImportPath": "github.com/taik/go-port-checker/checker",
+	"GoVersion": "go1.4.2",
+	"Deps": [
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.7.2-4-gcdd90c3",
+			"Rev": "cdd90c38c6e3718c731b555b9c3ed1becebec3ba"
+		},
+		{
+			"ImportPath": "github.com/boltdb/bolt",
+			"Comment": "v1.0-110-gbe4e606",
+			"Rev": "be4e606bc48012421bc90eda58a8aad7a95aaf83"
+		},
+		{
+			"ImportPath": "github.com/smartystreets/goconvey/convey",
+			"Comment": "1.5.0-270-gc9900a9",
+			"Rev": "c9900a95b757fd2e72857ee2c9bf9529fc335eb0"
+		}
+	]
+}
