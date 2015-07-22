@@ -1,8 +1,8 @@
 package checker
 
 import (
+	"stablelib.com/v1/database/bolt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/boltdb/bolt"
 )
 
 

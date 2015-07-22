@@ -1,17 +1,19 @@
 package checker
+
 import (
+	"errors"
 	"net"
 	"time"
-	"errors"
+
+	"encoding/json"
 
 	log "github.com/Sirupsen/logrus"
-	"encoding/json"
 )
 
-
+// StatusEntry stores the status and expiration time of the address.
 type StatusEntry struct {
-	Address string
-	Status bool
+	Address   string
+	Status    bool
 	Timestamp time.Time
 }
 
@@ -21,17 +23,22 @@ func deserializeToStatusEntry(data []byte) (*StatusEntry, error) {
 	return entry, err
 }
 
+// Deserialize unmarshals the StatusEntry instance into a struct.
 func (e *StatusEntry) Deserialize(bytes []byte) error {
 	return json.Unmarshal(bytes, e)
 }
 
+// Serialize returns the byte array after serializing the StatusEntry struct.
 func (e *StatusEntry) Serialize() ([]byte, error) {
 	return json.Marshal(e)
 }
 
+// GetCachedAddrStatus returns the status of the host.
+// If the timestamp falls within `cachedInterval`, the cached status is returned. Otherwise,
+// a live status check is queued and a StatusEntry is created.
 func GetCachedAddrStatus(db *Storage, address string, cachedInterval time.Duration) (bool, error) {
 	logFields := log.Fields{
-		"address": address,
+		"address":        address,
 		"cachedInterval": cachedInterval,
 	}
 
@@ -59,7 +66,6 @@ func GetCachedAddrStatus(db *Storage, address string, cachedInterval time.Durati
 	return entry.Status, nil
 }
 
-
 // GetAddrStatus returns a boolean representing the state of the address.
 func GetAddrStatus(address string) (bool, error) {
 	logger := log.WithFields(log.Fields{
@@ -71,8 +77,7 @@ func GetAddrStatus(address string) (bool, error) {
 	if err != nil {
 		logger.Debug("Could not connect to server")
 		return false, errors.New("Could not connect to server")
-	} else {
-		defer conn.Close()
-		return true, nil
 	}
+	defer conn.Close()
+	return true, nil
 }

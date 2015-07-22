@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
-	"github.com/boltdb/bolt"
+	"stablelib.com/v1/database/bolt"
 )
 
 
