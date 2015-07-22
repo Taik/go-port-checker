@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"github.com/gin-gonic/gin"
 	"github.com/taik/go-port-checker/checker"
+	"fmt"
+	"os"
 )
 
 
@@ -72,5 +74,10 @@ func main() {
 	router.GET("/", statusResource.mainHandler)
 	router.GET("/status/:address", statusResource.statusCheckHandler)
 
-	router.Run(":8008")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	router.Run(fmt.Sprintf(":%s", port))
 }
