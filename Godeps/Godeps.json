@@ -1,5 +1,51 @@
 {
 	"ImportPath": "github.com/taik/go-port-checker",
 	"GoVersion": "go1.4.2",
-	"Deps": []
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.8.3-3-g07d998d",
+			"Rev": "07d998d174c4e2dc90e2f1989a20724220bca1ff"
+		},
+		{
+			"ImportPath": "github.com/boltdb/bolt",
+			"Comment": "v1.0-110-gbe4e606",
+			"Rev": "be4e606bc48012421bc90eda58a8aad7a95aaf83"
+		},
+		{
+			"ImportPath": "github.com/gin-gonic/gin",
+			"Comment": "v1.0rc1-136-gfd5d429",
+			"Rev": "fd5d4294a5d5223d55fc76d7840f4b0ad91647bb"
+		},
+		{
+			"ImportPath": "github.com/manucorporat/sse",
+			"Rev": "c142f0f1baea5cef7f98a8a6c222f6134368c1f5"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-colorable",
+			"Rev": "40e4aedc8fabf8c23e040057540867186712faa5"
+		},
+		{
+			"ImportPath": "github.com/smartystreets/goconvey/convey",
+			"Comment": "1.5.0-270-gc9900a9",
+			"Rev": "c9900a95b757fd2e72857ee2c9bf9529fc335eb0"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "a8c61998a557a37435f719980da368469c10bfed"
+		},
+		{
+			"ImportPath": "gopkg.in/bluesuncorp/validator.v5",
+			"Comment": "v5.8.1",
+			"Rev": "27a1d3f1583676b710bb06faf4c8927dd941a893"
+		},
+		{
+			"ImportPath": "stablelib.com/v1/database/bolt",
+			"Comment": "v1.2.0",
+			"Rev": "aa2aacf5b010cc11021a3ad58adcbf2d97fdb458"
+		}
+	]
 }
