@@ -6,6 +6,7 @@ import (
 	"github.com/taik/go-port-checker/checker"
 	"fmt"
 	"os"
+	"runtime"
 )
 
 
@@ -60,6 +61,8 @@ func (r *StatusResource) statusCheckHandler(c *gin.Context) {
 
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	router := gin.New()
 
 	router.Use(gin.Logger())
@@ -78,6 +81,5 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-
 	router.Run(fmt.Sprintf(":%s", port))
 }
