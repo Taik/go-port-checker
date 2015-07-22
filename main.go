@@ -1,6 +1,21 @@
-package checker
-import "fmt"
+package main
+
+import (
+	"github.com/gin-gonic/gin"
+)
+
 
 func main() {
-	fmt.Println("It works!")
+	router := gin.New()
+
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status": "OK",
+		})
+	})
+
+	router.Run(":8008")
 }
