@@ -5,6 +5,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"errors"
 )
 
 
@@ -24,7 +25,7 @@ func GetAddrStatus(address string) (bool, error) {
 	conn, err := net.DialTimeout("tcp", address, timeout)
 	if err != nil {
 		logger.Debug("Could not connect to server")
-		return false, err
+		return false, errors.New("Could not connect to server")
 	}
 	defer conn.Close()
 	return true, nil

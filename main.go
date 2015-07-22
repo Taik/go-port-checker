@@ -40,8 +40,10 @@ func (r *StatusResource) statusCheckHandler(c *gin.Context) {
 	status := <- statusChan
 
 	if status.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status": "error",
+		c.JSON(http.StatusOK, gin.H{
+			"status": "ok",
+			"address": address,
+			"online": status.IsOnline,
 			"msg": status.Error.Error(),
 		})
 		return
