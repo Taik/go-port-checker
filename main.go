@@ -1,7 +1,6 @@
 package main
 
 import (
-	"time"
 	"net/http"
 	"github.com/gin-gonic/gin"
 	"github.com/taik/go-port-checker/checker"
@@ -31,12 +30,19 @@ func (r *StatusResource) statusCheckHandler(c *gin.Context) {
 		return
 	}
 
-	cacheInterval := 2 * time.Second
-	status, err := checker.GetCachedAddrStatus(r.storage, address, cacheInterval)
-	if err != nil {
+	statusChan := make(chan *checker.StatusEntry)
+
+	go func() {
+		status, err := checker.GetAddrStatus(address)
+		statusChan <- &checker.StatusEntry{IsOnline: status, Error: err}
+	}()
+
+	status := <- statusChan
+
+	if status.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status": "error",
-			"msg": err.Error(),
+			"msg": status.Error.Error(),
 		})
 		return
 	}
@@ -44,7 +50,7 @@ func (r *StatusResource) statusCheckHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status": "ok",
 		"address": address,
-		"online": status,
+		"online": status.IsOnline,
 	})
 }
 
