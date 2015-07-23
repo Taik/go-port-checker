@@ -1,0 +1,30 @@
+redis
+-----
+
+Package redis is a client for the Redis database.
+
+
+Usage:
+
+    import "stablelib.com/v1/database/redis"
+
+
+Documentation:
+
+    https://stablelib.com/doc/v1/database/redis
+
+
+Upstream:
+
+    https://github.com/garyburd/redigo
+
+
+StableLib package version:
+
+    1.1.0
+
+
+Use is subject to StableLib Terms of Service: https://stablelib.com/terms/
+
+StableLib is a distribution of open source Go packages with long-term support.
+Learn more at https://stablelib.com
