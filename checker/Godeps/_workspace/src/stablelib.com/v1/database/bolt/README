@@ -1,0 +1,30 @@
+bolt
+----
+
+Package bolt implements a low-level key/value store in pure Go.
+
+
+Usage:
+
+    import "stablelib.com/v1/database/bolt"
+
+
+Documentation:
+
+    https://stablelib.com/doc/v1/database/bolt
+
+
+Upstream:
+
+    https://github.com/boltdb/bolt
+
+
+StableLib package version:
+
+    1.2.0
+
+
+Use is subject to StableLib Terms of Service: https://stablelib.com/terms/
+
+StableLib is a distribution of open source Go packages with long-term support.
+Learn more at https://stablelib.com
