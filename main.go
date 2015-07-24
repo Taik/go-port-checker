@@ -7,12 +7,40 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+
+	"stablelib.com/v1/database/redis"
+	"time"
 )
+
+
+func newRedisPool(server string, password string) *redis.Pool {
+	return &redis.Pool{
+		IdleTimeout: 5 * time.Minute,
+		MaxIdle: 5,
+		Dial: func() (redis.Conn, error) {
+			c, err := redis.Dial("tcp", server)
+			if err != nil {
+				return nil, err
+			}
+			if password != "" {
+				if _, err := c.Do("AUTH", password); err != nil {
+					c.Close()
+					return nil, err
+				}
+			}
+			return c, nil
+		},
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			_, err := c.Do("PING")
+			return err
+		},
+	}
+}
 
 
 // StatusResource holds shared states across
 type StatusResource struct {
-	storage *checker.Storage
+	Cache *redis.Pool
 }
 
 
@@ -33,14 +61,26 @@ func (r *StatusResource) statusCheckHandler(c *gin.Context) {
 		return
 	}
 
+	cacheConn := r.Cache.Get()
+	defer cacheConn.Close()
+
 	statusChan := make(chan *checker.StatusEntry)
+	status := &checker.StatusEntry{}
 
-	go func() {
-		status, err := checker.GetAddrStatus(address)
-		statusChan <- &checker.StatusEntry{IsOnline: status, Error: err}
-	}()
-
-	status := <- statusChan
+	cachedStatus, err := redis.Bool(cacheConn.Do("GET", address))
+	if err != nil {
+		// Nil returned
+		go func() {
+			fmt.Println("GetAddrStatus()")
+			status, err := checker.GetAddrStatus(address)
+			cacheConn.Do("SETEX", address, 60, true)
+			statusChan <- &checker.StatusEntry{IsOnline: status, Error: err}
+		}()
+		status = <-statusChan
+	} else {
+		fmt.Printf("Cached Status: %s", cachedStatus)
+		status.IsOnline = cachedStatus
+	}
 
 	if status.Error != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -61,25 +101,28 @@ func (r *StatusResource) statusCheckHandler(c *gin.Context) {
 
 
 func main() {
+	// Configuration
 	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	redisAddr := os.Getenv("REDIS_ADDR")
+	redisPass := os.Getenv("REDIS_PASSWORD")
+
+	cache := newRedisPool(redisAddr, redisPass)
+	statusResource := &StatusResource{Cache: cache}
+	defer statusResource.Cache.Close()
 
 	router := gin.New()
 
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
-	storage := checker.NewStorage("/tmp/status.bolt", "status")
-	if err := storage.Init(); err != nil {
-		panic("Could not initialize storage")
-	}
-	statusResource := &StatusResource{storage: storage}
 
 	router.GET("/", statusResource.mainHandler)
 	router.GET("/status/:address", statusResource.statusCheckHandler)
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
 	router.Run(fmt.Sprintf(":%s", port))
 }
