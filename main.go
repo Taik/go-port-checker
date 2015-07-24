@@ -71,14 +71,12 @@ func (r *StatusResource) statusCheckHandler(c *gin.Context) {
 	if err != nil {
 		// Nil returned
 		go func() {
-			fmt.Println("GetAddrStatus()")
 			status, err := checker.GetAddrStatus(address)
 			cacheConn.Do("SETEX", address, 60, true)
 			statusChan <- &checker.StatusEntry{IsOnline: status, Error: err}
 		}()
 		status = <-statusChan
 	} else {
-		fmt.Printf("Cached Status: %s", cachedStatus)
 		status.IsOnline = cachedStatus
 	}
 
