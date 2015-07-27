@@ -69,10 +69,10 @@ func (r *StatusResource) statusCheckHandler(c *gin.Context) {
 
 	cachedStatus, err := redis.Bool(cacheConn.Do("GET", address))
 	if err != nil {
-		// Nil returned
+		// When error message is set to nil returned, this means that the key was not found.
 		go func() {
 			status, err := checker.GetAddrStatus(address)
-			cacheConn.Do("SETEX", address, 60, true)
+			cacheConn.Do("SETEX", address, 120, true)
 			statusChan <- &checker.StatusEntry{IsOnline: status, Error: err}
 		}()
 		status = <-statusChan
