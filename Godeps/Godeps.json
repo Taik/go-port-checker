@@ -1,6 +1,9 @@
 {
 	"ImportPath": "github.com/taik/go-port-checker",
 	"GoVersion": "go1.4.2",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/Sirupsen/logrus",
@@ -19,6 +22,11 @@
 		{
 			"ImportPath": "github.com/mattn/go-colorable",
 			"Rev": "40e4aedc8fabf8c23e040057540867186712faa5"
+		},
+		{
+			"ImportPath": "github.com/smartystreets/goconvey/convey",
+			"Comment": "1.5.0-270-gc9900a9",
+			"Rev": "c9900a95b757fd2e72857ee2c9bf9529fc335eb0"
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",
