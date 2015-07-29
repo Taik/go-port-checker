@@ -1,0 +1,19 @@
+box: golang
+build:
+  steps:
+    - setup-go-workspace
+    - script:
+        name: Dependency management
+        code: |
+          go get github.com/tools/godep
+          godep restore
+
+    - script:
+        name: Build
+        code: |
+          godep go build ./...
+
+    - script:
+        name: Test
+        code: |
+          godep go test ./...
