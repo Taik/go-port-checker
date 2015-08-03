@@ -1,22 +1,21 @@
 package main
 
 import (
-	"net/http"
-	"github.com/gin-gonic/gin"
-	"github.com/taik/go-port-checker/checker"
 	"fmt"
-	"os"
-	"runtime"
-
-	"stablelib.com/v1/database/redis"
+	"net/http"
 	"time"
-)
 
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
+	"stablelib.com/v1/database/redis"
+
+	"github.com/taik/go-port-checker/checker"
+)
 
 func newRedisPool(server string, password string) *redis.Pool {
 	return &redis.Pool{
 		IdleTimeout: 5 * time.Minute,
-		MaxIdle: 5,
+		MaxIdle:     5,
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", server)
 			if err != nil {
@@ -37,12 +36,10 @@ func newRedisPool(server string, password string) *redis.Pool {
 	}
 }
 
-
 // StatusResource holds shared states across
 type StatusResource struct {
 	Cache *redis.Pool
 }
-
 
 func (r *StatusResource) mainHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
@@ -50,13 +47,12 @@ func (r *StatusResource) mainHandler(c *gin.Context) {
 	})
 }
 
-
 func (r *StatusResource) statusCheckHandler(c *gin.Context) {
 	address := c.Param("address")
 	if len(address) > 64 {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": "error",
-			"msg": "Address is too long",
+			"msg":    "Address is too long",
 		})
 		return
 	}
@@ -82,34 +78,35 @@ func (r *StatusResource) statusCheckHandler(c *gin.Context) {
 
 	if status.Error != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"status": "ok",
+			"status":  "ok",
 			"address": address,
-			"online": status.IsOnline,
-			"msg": status.Error.Error(),
+			"online":  status.IsOnline,
+			"msg":     status.Error.Error(),
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status": "ok",
+		"status":  "ok",
 		"address": address,
-		"online": status.IsOnline,
+		"online":  status.IsOnline,
 	})
 }
 
+func initConfig() *viper.Viper {
+	c := viper.New()
+	c.SetConfigName("portChecker")
+	c.SetEnvPrefix("checker")
+	c.AutomaticEnv()
+
+	c.SetDefault("Port", "8080")
+	return c
+}
 
 func main() {
-	// Configuration
-	runtime.GOMAXPROCS(runtime.NumCPU())
+	config := initConfig()
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	redisAddr := os.Getenv("REDIS_ADDR")
-	redisPass := os.Getenv("REDIS_PASSWORD")
-
-	cache := newRedisPool(redisAddr, redisPass)
+	cache := newRedisPool(config.GetString("RedisAddr"), config.GetString("RedisPass"))
 	statusResource := &StatusResource{Cache: cache}
 	defer statusResource.Cache.Close()
 
@@ -118,9 +115,8 @@ func main() {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
-
 	router.GET("/", statusResource.mainHandler)
 	router.GET("/status/:address", statusResource.statusCheckHandler)
 
-	router.Run(fmt.Sprintf(":%s", port))
+	router.Run(fmt.Sprintf(":%s", config.GetString("Port")))
 }
