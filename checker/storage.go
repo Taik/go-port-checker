@@ -1,10 +1,9 @@
 package checker
 
 import (
-	"stablelib.com/v1/database/bolt"
 	log "github.com/Sirupsen/logrus"
+	"stablelib.com/v1/database/bolt"
 )
-
 
 type Storage struct {
 	*bolt.DB
@@ -14,7 +13,7 @@ type Storage struct {
 
 func NewStorage(path string, bucket string) *Storage {
 	s := &Storage{
-		DBPath: path,
+		DBPath:     path,
 		BucketName: []byte(bucket),
 	}
 	return s
@@ -22,7 +21,7 @@ func NewStorage(path string, bucket string) *Storage {
 
 func (s *Storage) Init() error {
 	logger := log.WithFields(log.Fields{
-		"dbPath": s.DBPath,
+		"dbPath":     s.DBPath,
 		"bucketName": s.BucketName,
 	})
 	var err error
@@ -33,7 +32,7 @@ func (s *Storage) Init() error {
 		return err
 	}
 
-	err = s.Update(func (tx *bolt.Tx) error {
+	err = s.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists(s.BucketName)
 		return err
 	})
@@ -59,7 +58,7 @@ func (s *Storage) PutString(key string, value string) error {
 }
 
 func (s *Storage) PutBytes(key []byte, value []byte) error {
-	return s.Update(func (tx *bolt.Tx) error {
+	return s.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(s.BucketName)
 		return bucket.Put(key, value)
 	})
