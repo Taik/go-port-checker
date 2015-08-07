@@ -1,8 +1,18 @@
+machine:
+  pre:
+    - bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
+    - source /home/ubuntu/.gvm/scripts/gvm
+  post:
+    - gvm install go1.4.2 --name=stable --binary
+    - gvm use stable --default
+
 dependencies:
   pre:
     - go get github.com/tools/godep
+  override:
     - godep restore
+    - gvm linkthis github.com/taik/go-port-checker
 
 test:
   override:
-    - godep go test ./...
+    - godep go test -v ./...
