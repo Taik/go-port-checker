@@ -1,19 +1,17 @@
 package checker
 
 import (
+	"errors"
 	"net"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"errors"
 )
-
 
 type StatusEntry struct {
 	IsOnline bool
-	Error 	error
+	Error    error
 }
-
 
 // GetAddrStatus returns a boolean representing the state of the address.
 func GetAddrStatus(address string) (bool, error) {
