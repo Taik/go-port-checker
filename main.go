@@ -6,39 +6,15 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pmylund/go-cache"
 	"github.com/spf13/viper"
-	"stablelib.com/v1/database/redis"
 
 	"github.com/taik/go-port-checker/checker"
 )
 
-func newRedisPool(server string, password string) *redis.Pool {
-	return &redis.Pool{
-		IdleTimeout: 5 * time.Minute,
-		MaxIdle:     5,
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", server)
-			if err != nil {
-				return nil, err
-			}
-			if password != "" {
-				if _, err := c.Do("AUTH", password); err != nil {
-					c.Close()
-					return nil, err
-				}
-			}
-			return c, nil
-		},
-		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			_, err := c.Do("PING")
-			return err
-		},
-	}
-}
-
 // StatusResource holds shared states across
 type StatusResource struct {
-	Cache *redis.Pool
+	Cache *cache.Cache
 }
 
 func (r *StatusResource) mainHandler(c *gin.Context) {
@@ -57,23 +33,20 @@ func (r *StatusResource) statusCheckHandler(c *gin.Context) {
 		return
 	}
 
-	cacheConn := r.Cache.Get()
-	defer cacheConn.Close()
-
 	statusChan := make(chan *checker.StatusEntry)
 	status := &checker.StatusEntry{}
 
-	cachedStatus, err := redis.Bool(cacheConn.Do("GET", address))
-	if err != nil {
+	cachedStatus, found := r.Cache.Get(address)
+	if !found {
 		// When error message is set to nil returned, this means that the key was not found.
 		go func() {
 			status, err := checker.GetAddrStatus(address)
-			cacheConn.Do("SETEX", address, 120, true)
+			r.Cache.Set(address, status, cache.DefaultExpiration)
 			statusChan <- &checker.StatusEntry{IsOnline: status, Error: err}
 		}()
 		status = <-statusChan
 	} else {
-		status.IsOnline = cachedStatus
+		status.IsOnline = cachedStatus.(bool)
 	}
 
 	if status.Error != nil {
@@ -99,16 +72,21 @@ func initConfig() *viper.Viper {
 	c.SetEnvPrefix("checker")
 	c.AutomaticEnv()
 
-	c.SetDefault("Port", "8080")
+	c.SetDefault("ListenPort", "8080")
+	c.SetDefault("CacheExpirationMS", 30*1000)
+	c.SetDefault("CacheCleanupIntervalMS", 10*1000)
+
 	return c
 }
 
 func main() {
 	config := initConfig()
 
-	cache := newRedisPool(config.GetString("RedisAddr"), config.GetString("RedisPass"))
-	statusResource := &StatusResource{Cache: cache}
-	defer statusResource.Cache.Close()
+	c := cache.New(
+		time.Duration(config.GetInt("CacheExpirationMS"))*time.Millisecond,
+		time.Duration(config.GetInt("CacheCleanupIntervalMS"))*time.Millisecond,
+	)
+	statusResource := &StatusResource{Cache: c}
 
 	router := gin.New()
 
@@ -118,5 +96,5 @@ func main() {
 	router.GET("/", statusResource.mainHandler)
 	router.GET("/status/:address", statusResource.statusCheckHandler)
 
-	router.Run(fmt.Sprintf(":%s", config.GetString("Port")))
+	router.Run(fmt.Sprintf(":%s", config.GetString("ListenPort")))
 }
