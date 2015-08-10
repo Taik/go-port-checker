@@ -72,6 +72,9 @@ func initConfig() *viper.Viper {
 	c.SetEnvPrefix("checker")
 	c.AutomaticEnv()
 
+	// Overrides ListenPort value with a non-prefixed environment var
+	c.BindEnv("ListenPort", "PORT")
+
 	c.SetDefault("ListenPort", "8080")
 	c.SetDefault("CacheExpirationMS", 30*1000)
 	c.SetDefault("CacheCleanupIntervalMS", 10*1000)
