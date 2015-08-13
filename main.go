@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -24,7 +25,7 @@ func (r *StatusResource) mainHandler(c *gin.Context) {
 }
 
 func (r *StatusResource) statusCheckHandler(c *gin.Context) {
-	address := c.Param("address")
+	address := strings.Trim(c.Param("address"), " ")
 	if len(address) > 64 {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": "error",
