@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/taik/go-port-checker/checker"
+	"runtime"
 )
 
 // StatusResource holds shared states across
@@ -79,6 +80,7 @@ func initConfig() *viper.Viper {
 	c.SetDefault("ListenPort", "8080")
 	c.SetDefault("CacheExpirationMS", 30*1000)
 	c.SetDefault("CacheCleanupIntervalMS", 10*1000)
+	c.SetDefault("Threads", runtime.NumCPU())
 
 	return c
 }
@@ -86,6 +88,7 @@ func initConfig() *viper.Viper {
 func main() {
 	config := initConfig()
 
+	runtime.GOMAXPROCS(config.GetInt("Threads"))
 	c := cache.New(
 		time.Duration(config.GetInt("CacheExpirationMS"))*time.Millisecond,
 		time.Duration(config.GetInt("CacheCleanupIntervalMS"))*time.Millisecond,
