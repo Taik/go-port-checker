@@ -68,6 +68,11 @@ func (r *StatusResource) statusCheckHandler(c *gin.Context) {
 	})
 }
 
+func (r *StatusResource) loaderIOHandler(c *gin.Context) {
+	c.Writer.WriteString("loaderio-9238b813ae75e7c43e9fc839c78fa7de")
+	return
+}
+
 func initConfig() *viper.Viper {
 	c := viper.New()
 	c.SetConfigName("portChecker")
@@ -101,6 +106,7 @@ func main() {
 	router.Use(gin.Recovery())
 
 	router.GET("/", statusResource.mainHandler)
+	router.GET("/loaderio-9238b813ae75e7c43e9fc839c78fa7de", statusResource.loaderIOHandler)
 	router.GET("/status/:address", statusResource.statusCheckHandler)
 
 	router.Run(fmt.Sprintf(":%s", config.GetString("ListenPort")))
