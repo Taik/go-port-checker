@@ -10,8 +10,7 @@ dependencies:
   override:
     - gvm linkthis github.com/taik/go-port-checker
     - make deps
-    - godep restore
 
 test:
   override:
-    - go test -v ./...
+    - godep go test -v ./...
