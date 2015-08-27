@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"runtime"
 	"strings"
 	"time"
 
@@ -11,7 +12,6 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/taik/go-port-checker/checker"
-	"runtime"
 )
 
 // StatusResource holds shared states across
