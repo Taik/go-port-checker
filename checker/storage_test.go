@@ -1,21 +1,19 @@
 package checker
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
 
+	"github.com/etcd-io/bbolt"
 	. "github.com/smartystreets/goconvey/convey"
-	"stablelib.com/v1/database/bolt"
 )
-
 
 func TestStorageSpec(t *testing.T) {
 	Convey("Given database path and name", t, func() {
 		file, err := ioutil.TempFile("", "bolt-")
 		if err != nil {
-			fmt.Errorf("Could not generate a new tempfile")
+			t.Fatalf("Could not generate a new tempfile")
 		}
 		bucketName := "testBucket"
 
@@ -38,7 +36,7 @@ func TestStorageSpec(t *testing.T) {
 				So(s.DB, ShouldHaveSameTypeAs, &bolt.DB{})
 			})
 			Convey("The bucket should be created", func() {
-				s.View(func (tx *bolt.Tx) error {
+				s.View(func(tx *bolt.Tx) error {
 					bucket := tx.Bucket([]byte(bucketName))
 					So(bucket, ShouldNotBeNil)
 					return nil
@@ -51,7 +49,7 @@ func TestStorageSpec(t *testing.T) {
 			s.Init()
 			key := []byte("some-existent-key")
 			value := []byte("some-existent-value")
-			s.Update(func (tx *bolt.Tx) error {
+			s.Update(func(tx *bolt.Tx) error {
 				bucket := tx.Bucket(s.BucketName)
 				return bucket.Put(key, value)
 			})
@@ -72,7 +70,7 @@ func TestStorageSpec(t *testing.T) {
 			s.Init()
 			key := "some-existent-key"
 			value := "some-existent-value"
-			s.Update(func (tx *bolt.Tx) error {
+			s.Update(func(tx *bolt.Tx) error {
 				bucket := tx.Bucket(s.BucketName)
 				return bucket.Put([]byte(key), []byte(value))
 			})
@@ -119,7 +117,6 @@ func TestStorageSpec(t *testing.T) {
 				})
 			})
 		})
-
 
 		Reset(func() {
 			os.Remove(file.Name())

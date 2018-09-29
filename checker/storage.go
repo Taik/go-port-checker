@@ -2,7 +2,7 @@ package checker
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"stablelib.com/v1/database/bolt"
+	"github.com/etcd-io/bbolt"
 )
 
 type Storage struct {
